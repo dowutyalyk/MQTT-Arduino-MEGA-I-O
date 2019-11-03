@@ -1,6 +1,7 @@
 # MQTT-Arduino-MEGA-I-O
 
 Written by Peter Illmayer
+
 Adapted by Jeroen Schaeken replacing ethernet by Wifi
 
 ## Description
@@ -17,12 +18,12 @@ Lots of debug available on the serial port.
 
 ## About this fork (Jeroen Schaeken)
 
-As a proof of concept I adapted the code to work with a `Mega2560 + WiFi R3 ATmega2560+ESP8266 32Mb memory USB-TTL CH340G` you can find on Aliexpress around 10 euros. I tested it with a traditional arduino Mega hooked up to a ESP8266 NodeMcu via Serial3. Instructions for the Mega2560 Esp8266 combined board can be found here:
+As a proof of concept I adapted the code to work with a `Mega2560 + WiFi R3 ATmega2560+ESP8266 32Mb memory USB-TTL CH340G` you can find on Aliexpress for around 10 euros. I tested it with a traditional Arduino Mega hooked up to a ESP8266 NodeMcu via Serial3. Instructions for the Mega2560+Esp8266 in one board can be found here:
 https://community.openhab.org/t/howto-arduinomega-esp8266-to-mqtt-server-great-for-multi-sensor-monitoring/37304
 
 You need to flash the esp8266 with the firmware found here: https://github.com/jandrassy/arduino-library-wifilink, the WiFilink library for arduino needs to be put on your Arduino IDE as instructed here: https://github.com/jandrassy/arduino-library-wifilink. 
 
-I struggled getting the esp8266 to work reliable, e.g. I could not get an ip when connecting to the AP and when I did I got empty pages, etc. It got solved by downgrading Arduino to 2.4.1, there`s an issue open for this https://github.com/jandrassy/arduino-firmware-wifilink/issues/10
+At first, I struggled getting the esp8266 to work reliable, e.g. I could not get an ip when connecting to the AP and when I did I got empty pages, etc. It got solved by downgrading Arduino to 2.4.1, there`s an issue open for this https://github.com/jandrassy/arduino-firmware-wifilink/issues/10
 
 ## MQTT messages
 
