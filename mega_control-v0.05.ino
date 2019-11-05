@@ -163,7 +163,11 @@ void setup()
   printWifiData();
 
   Serial.println("Setting input pull-ups");
-  for ( byte i = 0; i < 24; i++)
+  pinMode(buttonArray[0],INPUT);
+  digitalWrite(buttonArray[0],LOW);
+  pinMode(buttonArray[1],INPUT);
+  digitalWrite(buttonArray[1],LOW);
+  for ( byte i = 2; i < 24; i++) //first two not
   {
     pinMode(buttonArray[i], INPUT_PULLUP);
     Serial.print(buttonArray[i]);
@@ -176,7 +180,7 @@ void setup()
   {
     pinMode(outputArray[i], OUTPUT);
     digitalWrite(outputArray[i], HIGH);
-    Serial.print(outputArray[i]);
+      
     Serial.print(" ");
   }
   Serial.println();
