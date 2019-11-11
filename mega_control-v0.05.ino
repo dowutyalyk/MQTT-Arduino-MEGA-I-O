@@ -52,8 +52,8 @@ int status = WL_IDLE_STATUS;     // the Wifi radio's status
 IPAddress broker(51, 15, 85, 1);                                    // MQTT broker
 int mqttPort = 1883;                                                // MQTT port
 IPAddress ip(192, 168, 1, 35);                                      // Default if DHCP is not used
-const char* user  = "";                                             // MQTT user
-const char* password  = "";                                         // MQTT password
+const char* user  = "xxxxxxx";                                             // MQTT user
+const char* password  = "xxxxxxx";                                         // MQTT password
 byte buttonId;
 byte lastButtonPressed = 0;
 byte bufferIndex;
@@ -100,10 +100,11 @@ static byte buttonArray[24]     = {  54, 55, 56, 57,   58, 59, 60, 61,     // A0
                                   };   // D40-D47
 
 
-static byte outputArray[24]      = { 16, 17, 18, 19,   20, 21, 22, 23,     // D16-D23
+static byte outputArray[32]      = { 16, 17, 18, 19,   20, 21, 22, 23,     // D16-D23
                                      24, 25, 26, 27,   28, 29, 30, 31,     // D24-D31
-                                     32, 33, 34, 35,   36, 37, 38, 39
-                                   };   // D32-D39
+                                     32, 33, 34, 35,   36, 37, 38, 39,      // D32-D39
+                                     2, 3, 4, 5, 6, 7, 8, 9 // D2-D9 PWM
+                                   };
 
 
 void(* resetFunc) (void) = 0; //declare reset function @ address 0
@@ -163,10 +164,10 @@ void setup()
   printWifiData();
 
   Serial.println("Setting input pull-ups");
-  pinMode(buttonArray[0],INPUT);
-  digitalWrite(buttonArray[0],LOW);
-  pinMode(buttonArray[1],INPUT);
-  digitalWrite(buttonArray[1],LOW);
+  pinMode(buttonArray[0], INPUT);
+  digitalWrite(buttonArray[0], LOW);
+  pinMode(buttonArray[1], INPUT);
+  digitalWrite(buttonArray[1], LOW);
   for ( byte i = 2; i < 24; i++) //first two not
   {
     pinMode(buttonArray[i], INPUT_PULLUP);
@@ -175,12 +176,19 @@ void setup()
   }
   Serial.println();
 
-  Serial.println("Setting Outputs");
+  Serial.println("Setting Outputs"); // Relay  output
   for ( byte i = 0; i < 24; i++)
   {
     pinMode(outputArray[i], OUTPUT);
     digitalWrite(outputArray[i], HIGH);
-      
+
+    Serial.print(" ");
+  }
+  for ( byte i = 24; i < 32; i++) // The other way around for PWM pins (led output)
+  {
+    pinMode(outputArray[i], OUTPUT);
+    digitalWrite(outputArray[i], LOW);
+
     Serial.print(" ");
   }
   Serial.println();
@@ -298,7 +306,6 @@ void runHeartbeat()
 void processButtonDigital( byte buttonId )
 {
   int sensorReading = digitalRead( buttonArray[buttonId] );
-
   if ( sensorReading == 0 ) // Input pulled low to GND. Button pressed.
   {
     if (lastButtonState[buttonId] == 0)  // The button was previously un-pressed
@@ -388,18 +395,46 @@ void callback(char* topic, byte* payload, unsigned int length)
   Serial.println(tempStr1);
   Serial.println(OutputNumber);
 
+  int payloadInt;
+
+  {
+    char buff_p[length];
+    for (int i = 0; i < length; i++)
+    {
+      Serial.print((char)payload[i]);
+      buff_p[i] = (char)payload[i];
+    }
+    buff_p[length] = '\0';
+    String msg_p = String(buff_p);
+    payloadInt = msg_p.toInt(); // to Int
+  }
+
   if (strcmp(tempStr1, "Output") == 0) {
-    if ((OutputNumber > 0) && (OutputNumber < 25)) {
+    if ((OutputNumber > 0) && (OutputNumber < 33)) {
       myPinIndex = (OutputNumber - 1);
       myOutputPin  = outputArray[myPinIndex];
-
-      if (((char)payload[0] == '1') || ((char)payload[0] == '0')) {
+      if (payloadInt > 1)  {
+        analogWrite(myOutputPin, payloadInt);
+        String text = "Turning output on -> ";
+        String serialmessage = text + myOutputPin + " , payload ";
+        Serial.println(serialmessage);
+        Serial.println(payloadInt);
+      }
+      else if (((char)payload[0] == '1') || ((char)payload[0] == '0')) {
         if ((char)payload[0] == '0') {
-          digitalWrite(myOutputPin, HIGH);   // Turn the LED off (Note that LOW is the voltage level
+          if (OutputNumber < 25) {
+            digitalWrite(myOutputPin, HIGH);   // Turn the LED off (Note that LOW is the voltage level
+
+          }
+          else {
+            digitalWrite(myOutputPin, LOW);   // Turn the LED off (Note that LOW is the voltage level
+
+          }
           String text = "Turning output off -> ";
           String serialmessage = text + myOutputPin;
           Serial.println(serialmessage);
-        } else {
+        }
+        else {
 
           digitalWrite(myOutputPin, LOW);  // Turn the LED on by making the voltage HIGH
           String text = "Turning output on -> ";
